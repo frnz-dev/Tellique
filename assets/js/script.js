@@ -1,22 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let users = JSON.parse(localStorage.getItem('users')) || {
-        'testuser': {
-            password: 'testpass',
-            messages: [],
-            sent: [],
-            profilePic: 'assets/images/default-avatar.png'
-        }
-    };
+    const BASE_URL = 'https://tellique-backend.onrender.com';
 
     window.previewImage = function () {
         const preview = document.getElementById('preview');
         const file = document.getElementById('profile-pic').files[0];
         const reader = new FileReader();
-
         reader.onloadend = function () {
             preview.src = reader.result;
         };
-
         if (file) {
             reader.readAsDataURL(file);
         } else {
@@ -26,51 +17,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const profilePic = document.getElementById('preview')?.src || 'assets/images/default-avatar.png';
+            const profilePic = document.getElementById('preview')?.src || '';
 
             if (password !== confirmPassword) {
                 alert("Passwords don't match!");
                 return;
             }
 
-            users[username] = { password, messages: [], sent: [], profilePic };
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('currentUser', username);
-            window.location.href = 'login.html';
+            try {
+                const response = await fetch(`${BASE_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, profilePic })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    sessionStorage.setItem('currentUser', username);
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.error || 'Signup failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error signing up');
+            }
         });
     }
 
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-            const user = users[username];
 
-            if (user && user.password === password) {
-                localStorage.setItem('currentUser', username);
-                window.location.href = 'home.html';
-            } else {
-                alert('Invalid credentials');
+            try {
+                const response = await fetch(`${BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    sessionStorage.setItem('currentUser', username);
+                    window.location.href = 'home.html';
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error logging in');
             }
         });
     }
 
-    const currentUser = localStorage.getItem('currentUser');
+    const currentUser = sessionStorage.getItem('currentUser');
     if (currentUser) {
         const avatarImg = document.getElementById('current-avatar');
         const avatarInput = document.getElementById('update-avatar');
 
         if (avatarImg) {
-            avatarImg.src = users[currentUser]?.profilePic || 'assets/images/default-avatar.png';
+            fetch(`${BASE_URL}/profile/${currentUser}`)
+                .then(res => res.json())
+                .then(data => {
+                    avatarImg.src = data.profilePic || 'assets/images/default-avatar.png';
+                });
         }
 
         if (avatarInput) {
@@ -81,9 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     reader.onloadend = () => {
                         const newAvatar = reader.result;
                         if (avatarImg) avatarImg.src = newAvatar;
-                        users[currentUser].profilePic = newAvatar;
-                        localStorage.setItem('users', JSON.stringify(users));
-                        alert("Avatar updated!");
+
+                        fetch(`${BASE_URL}/profile/${currentUser}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ profilePic: newAvatar })
+                        });
                     };
                     reader.readAsDataURL(file);
                 }
@@ -98,42 +117,34 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('username-display').textContent = currentUser;
             loadMessages();
 
-            document.getElementById('send-form')?.addEventListener('submit', (e) => {
+            document.getElementById('send-form')?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const recipient = document.getElementById('recipient').value;
                 const nickname = document.getElementById('nickname')?.value || 'Anonymous';
                 const content = document.getElementById('confession-text').value;
 
-                if (!users[recipient]) {
-                    alert('User not found');
-                    return;
+                try {
+                    const response = await fetch(`${BASE_URL}/api/messages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ from: currentUser, to: recipient, nickname, content })
+                    });
+                    if (response.ok) {
+                        alert('Confession sent!');
+                        document.getElementById('send-form').reset();
+                        loadMessages();
+                    } else {
+                        const data = await response.json();
+                        alert(data.error || 'Failed to send');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error sending message');
                 }
-
-                const timestamp = new Date().toLocaleString();
-
-                users[recipient].messages.push({
-                    from: currentUser,
-                    nickname,
-                    content,
-                    date: timestamp
-                });
-
-                if (!users[currentUser].sent) users[currentUser].sent = [];
-                users[currentUser].sent.push({
-                    to: recipient,
-                    content,
-                    date: timestamp,
-                    nickname
-                });
-
-                localStorage.setItem('users', JSON.stringify(users));
-                document.getElementById('send-form').reset();
-                alert('Confession sent!');
-                loadMessages();
             });
 
             document.getElementById('logout-btn')?.addEventListener('click', () => {
-                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
                 window.location.href = 'login.html';
             });
         }
@@ -145,22 +156,25 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('username-display').textContent = currentUser;
             const sentContainer = document.getElementById('sent-messages-container');
-            const user = users[currentUser];
 
-            if (sentContainer && user?.sent?.length > 0) {
-                sentContainer.innerHTML = user.sent.map(msg => `
-                    <div class="message">
-                        <h3>You (as "${msg.nickname || 'Anonymous'}") → ${msg.to}</h3>
-                        <p>${msg.content}</p>
-                        <small>${msg.date}</small>
-                    </div>
-                `).join('');
-            } else if (sentContainer) {
-                sentContainer.innerHTML = `<p>No sent messages yet.</p>`;
-            }
+            fetch(`${BASE_URL}/api/messages/sent/${currentUser}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        sentContainer.innerHTML = data.map(msg => `
+                            <div class="message">
+                                <h3>You (as "${msg.nickname}") → ${msg.to}</h3>
+                                <p>${msg.content}</p>
+                                <small>${msg.date}</small>
+                            </div>
+                        `).join('');
+                    } else {
+                        sentContainer.innerHTML = `<p>No sent messages yet.</p>`;
+                    }
+                });
 
             document.getElementById('logout-btn')?.addEventListener('click', () => {
-                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
                 window.location.href = 'login.html';
             });
         }
@@ -171,50 +185,40 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html';
         } else {
             document.getElementById('username-display').textContent = currentUser;
-
             const params = new URLSearchParams(window.location.search);
             const recipient = params.get('to');
             if (recipient) {
-                const input = document.getElementById('recipient');
-                if (input) input.value = recipient;
+                document.getElementById('recipient').value = recipient;
             }
 
-            document.getElementById('send-form')?.addEventListener('submit', (e) => {
+            document.getElementById('send-form')?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const recipient = document.getElementById('recipient').value;
                 const nickname = document.getElementById('nickname')?.value || 'Anonymous';
                 const content = document.getElementById('confession-text').value;
 
-                if (!users[recipient]) {
-                    alert('User not found');
-                    return;
+                try {
+                    const response = await fetch(`${BASE_URL}/api/messages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ from: currentUser, to: recipient, nickname, content })
+                    });
+                    if (response.ok) {
+                        alert('Confession sent!');
+                        document.getElementById('send-form').reset();
+                        window.location.href = 'sent.html';
+                    } else {
+                        const data = await response.json();
+                        alert(data.error || 'Failed to send');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error sending message');
                 }
-
-                const timestamp = new Date().toLocaleString();
-
-                users[recipient].messages.push({
-                    from: currentUser,
-                    nickname,
-                    content,
-                    date: timestamp
-                });
-
-                if (!users[currentUser].sent) users[currentUser].sent = [];
-                users[currentUser].sent.push({
-                    to: recipient,
-                    content,
-                    date: timestamp,
-                    nickname
-                });
-
-                localStorage.setItem('users', JSON.stringify(users));
-                document.getElementById('send-form').reset();
-                alert('Confession sent!');
-                window.location.href = 'sent.html';
             });
 
             document.getElementById('logout-btn')?.addEventListener('click', () => {
-                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
                 window.location.href = 'login.html';
             });
         }
@@ -222,28 +226,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadMessages() {
         const messagesContainer = document.getElementById('messages-container');
+        if (!messagesContainer || !currentUser) return;
 
-        if (messagesContainer && users[currentUser]) {
-            const messages = users[currentUser].messages;
-            if (messages.length === 0) {
-                messagesContainer.innerHTML = `<p>No messages yet.</p>`;
-                return;
-            }
+        fetch(`${BASE_URL}/api/messages/inbox/${currentUser}`)
+            .then(res => res.json())
+            .then(async data => {
+                if (!data.length) {
+                    messagesContainer.innerHTML = `<p>No messages yet.</p>`;
+                    return;
+                }
 
-            messagesContainer.innerHTML = messages.map(msg => {
-                const senderPic = users[msg.from]?.profilePic || 'assets/images/default-avatar.png';
-                return `
-                    <div class="message">
-                        <img src="${senderPic}" alt="Avatar" style="width:40px; height:40px; border-radius:50%; margin-bottom: 0.5rem;" />
-                        <h3>From: ${msg.nickname || 'Anonymous Confessor'}</h3>
-                        <p>${msg.content}</p>
-                        <small>${msg.date}</small>
-                        <br/>
-                        <a href="compose.html?to=${msg.from}" class="glow-button small" style="margin-top: 0.5rem;">Reply</a>
-                    </div>
-                `;
-            }).join('');
-        }
+                const messageHTML = await Promise.all(data.map(async msg => {
+                    const res = await fetch(`${BASE_URL}/profile/${msg.from}`);
+                    const profile = await res.json();
+                    const avatar = profile.profilePic || 'assets/images/default-avatar.png';
+
+                    return `
+                        <div class="message">
+                            <img src="${avatar}" alt="Avatar" style="width:40px; height:40px; border-radius:50%; margin-bottom: 0.5rem;" />
+                            <h3>From: ${msg.nickname || 'Anonymous Confessor'}</h3>
+                            <p>${msg.content}</p>
+                            <small>${msg.date}</small>
+                            <br/>
+                            <a href="compose.html?to=${msg.from}" class="glow-button small" style="margin-top: 0.5rem;">Reply</a>
+                        </div>
+                    `;
+                }));
+                messagesContainer.innerHTML = messageHTML.join('');
+            });
     }
 
     const themeToggle = document.querySelector('.switch .circle');
