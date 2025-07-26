@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`${BASE_URL}/signup`, {
+                const response = await fetch(`${BASE_URL}/api/users/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, profilePic })
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('login-password').value;
 
             try {
-                const response = await fetch(`${BASE_URL}/login`, {
+                const response = await fetch(`${BASE_URL}/api/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const avatarInput = document.getElementById('update-avatar');
 
         if (avatarImg) {
-            fetch(`${BASE_URL}/profile/${currentUser}`)
+            fetch(`${BASE_URL}/api/users/profile/${currentUser}`)
                 .then(res => res.json())
                 .then(data => {
                     avatarImg.src = data.profilePic || 'assets/images/default-avatar.png';
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const newAvatar = reader.result;
                         if (avatarImg) avatarImg.src = newAvatar;
 
-                        fetch(`${BASE_URL}/profile/${currentUser}`, {
+                        fetch(`${BASE_URL}/api/users/profile/${currentUser}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ profilePic: newAvatar })
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const messageHTML = await Promise.all(data.map(async msg => {
-                    const res = await fetch(`${BASE_URL}/profile/${msg.from}`);
+                    const res = await fetch(`${BASE_URL}/api/users/profile/${msg.from}`);
                     const profile = await res.json();
                     const avatar = profile.profilePic || 'assets/images/default-avatar.png';
 

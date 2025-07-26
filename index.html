@@ -31,12 +31,17 @@
           <span class="highlight"></span>
         </div>
 
-        <!-- Profile Image Upload -->
-        <label for="profile-pic" style="display:block; margin-top:1rem; color: var(--text); font-size: 0.9rem;">Upload Profile Picture:</label>
-        <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" style="margin-bottom: 1rem;" />
-        <div style="text-align:center; margin-bottom:1rem;">
-          <img id="preview" src="default-avatar.png" alt="Preview" style="width:80px; height:80px; border-radius:50%;" />
-        </div>
+        <!-- Profile Image Upload with Avatar UI -->
+<div class="upload-box">
+  <label for="profile-pic" class="upload-label">
+    <div class="upload-icon">📷</div>
+    <p>Click to upload photo</p>
+  </label>
+  <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" hidden />
+  <div class="preview-wrapper">
+    <img id="preview" src="assets/images/default-avatar.png" alt="Preview">
+  </div>
+</div>
 
         <button type="submit" class="glow-button">
           <span></span><span></span><span></span><span></span>
