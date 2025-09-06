@@ -1,58 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secret Confessions | Sign Up</title>
-  <link rel="stylesheet" href="assets/css/style.css"/>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url('https://picsum.photos/1600/900?blur=5') no-repeat center center/cover;
+    }
+
+    .signup-container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    .signup-container h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .signup-container input {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .signup-container input[type="text"],
+    .signup-container input[type="password"] {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .signup-container button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.3s;
+    }
+
+    .signup-container button:hover {
+      background: linear-gradient(135deg, #5563c1, #5c3c8a);
+    }
+
+    .extra {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .extra a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    /* Avatar upload */
+    .avatar-preview {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-top: 10px;
+      border: 3px solid #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .file-input {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #eee;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
-<body class="auth-page">
-  <div class="glow-container">
-    <div class="glow"></div>
-    <div class="auth-card">
-      <h1 class="neon-text">Create Account</h1>
 
-      <form id="signup-form" class="auth-form">
-        <div class="input-group">
-          <input type="text" id="username" required>
-          <label for="username">Username</label>
-          <span class="highlight"></span>
-        </div>
+<body>
+  <div class="signup-container">
+    <h2>Create Account</h2>
 
-        <div class="input-group">
-          <input type="password" id="password" required>
-          <label for="password">Password</label>
-          <span class="highlight"></span>
-        </div>
+    <!-- SIGNUP FORM -->
+    <form id="signup-form">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="password" id="confirm-password" placeholder="Confirm Password" required>
 
-        <div class="input-group">
-          <input type="password" id="confirm-password" required>
-          <label for="confirm-password">Confirm Password</label>
-          <span class="highlight"></span>
-        </div>
+      <!-- Avatar upload -->
+      <div class="file-input">
+        <label for="profile-pic">Upload Profile Picture:</label>
+        <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" />
+        <br>
+        <img id="preview" src="assets/images/default-avatar.png" alt="Preview" class="avatar-preview">
+      </div>
 
-        <!-- Profile Image Upload with Avatar UI -->
-<div class="upload-box">
-  <label for="profile-pic" class="upload-label">
-    <div class="upload-icon">📷</div>
-    <p>Click to upload photo</p>
-  </label>
-  <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" hidden />
-  <div class="preview-wrapper">
-    <img id="preview" src="assets/images/default-avatar.png" alt="Preview">
-  </div>
-</div>
+      <button type="submit">Sign Up</button>
+    </form>
 
-        <button type="submit" class="glow-button">
-          <span></span><span></span><span></span><span></span>
-          Sign Up
-        </button>
-      </form>
-
-      <p class="auth-link">Already have an account? <a href="login.html">Login</a></p>
+    <div class="extra">
+      <p>Already have an account? <a href="login.html">Login</a></p>
     </div>
   </div>
 
   <script src="assets/js/script.js"></script>
 </body>
+
 </html>
+
