@@ -2,10 +2,10 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Secret Confessions | Sign Up</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css" />
   <style>
     body {
       margin: 0;
@@ -78,21 +78,43 @@
       font-weight: bold;
     }
 
-    /* Avatar upload */
-    .avatar-preview {
+    /* Avatar Upload UI */
+    .upload-box {
+      margin-top: 15px;
+    }
+
+    .upload-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border 0.3s;
+    }
+
+    .upload-label:hover {
+      border: 2px dashed #764ba2;
+    }
+
+    .upload-icon {
+      font-size: 30px;
+      margin-bottom: 5px;
+    }
+
+    .preview-wrapper {
+      margin-top: 12px;
+    }
+
+    .preview-wrapper img {
       width: 90px;
       height: 90px;
       border-radius: 50%;
       object-fit: cover;
-      margin-top: 10px;
       border: 3px solid #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-    }
-
-    .file-input {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #eee;
     }
 
     @keyframes fadeIn {
@@ -113,18 +135,21 @@
   <div class="signup-container">
     <h2>Create Account</h2>
 
-    <!-- SIGNUP FORM -->
     <form id="signup-form">
       <input type="text" id="username" placeholder="Username" required>
       <input type="password" id="password" placeholder="Password" required>
       <input type="password" id="confirm-password" placeholder="Confirm Password" required>
 
-      <!-- Avatar upload -->
-      <div class="file-input">
-        <label for="profile-pic">Upload Profile Picture:</label>
-        <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" />
-        <br>
-        <img id="preview" src="assets/images/default-avatar.png" alt="Preview" class="avatar-preview">
+      <!-- Avatar Upload -->
+      <div class="upload-box">
+        <label for="profile-pic" class="upload-label">
+          <div class="upload-icon">📷</div>
+          <p>Click to upload photo</p>
+        </label>
+        <input type="file" id="profile-pic" accept="image/*" onchange="previewImage()" hidden />
+        <div class="preview-wrapper">
+          <img id="preview" src="assets/images/default-avatar.png" alt="Preview">
+        </div>
       </div>
 
       <button type="submit">Sign Up</button>

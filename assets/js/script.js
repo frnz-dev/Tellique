@@ -162,12 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(data => {
                     if (data.length > 0) {
                         sentContainer.innerHTML = data.map(msg => `
-                            <div class="message">
-                                <h3>You (as "${msg.nickname}") → ${msg.to}</h3>
-                                <p>${msg.content}</p>
-                                <small>${msg.date}</small>
-                            </div>
-                        `).join('');
+    <div class="message">
+        <img src="${msg.senderAvatar || 'assets/images/default-avatar.png'}"
+             style="width:40px; height:40px; border-radius:50%; margin-bottom:0.5rem;" />
+        <h3>You (as "${msg.nickname}") → ${msg.to}</h3>
+        <p>${msg.content}</p>
+        <small>${msg.date}</small>
+    </div>
+`).join('');
+
                     } else {
                         sentContainer.innerHTML = `<p>No sent messages yet.</p>`;
                     }
@@ -225,36 +228,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadMessages() {
-        const messagesContainer = document.getElementById('messages-container');
-        if (!messagesContainer || !currentUser) return;
+    const messagesContainer = document.getElementById('messages-container');
+    if (!messagesContainer || !currentUser) return;
 
-        fetch(`${BASE_URL}/api/messages/inbox/${currentUser}`)
-            .then(res => res.json())
-            .then(async data => {
-                if (!data.length) {
-                    messagesContainer.innerHTML = `<p>No messages yet.</p>`;
-                    return;
-                }
+    fetch(`${BASE_URL}/api/messages/inbox/${currentUser}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.length) {
+                messagesContainer.innerHTML = `<p>No messages yet.</p>`;
+                return;
+            }
 
-                const messageHTML = await Promise.all(data.map(async msg => {
-                    const res = await fetch(`${BASE_URL}/api/users/profile/${msg.from}`);
-                    const profile = await res.json();
-                    const avatar = profile.profilePic || 'assets/images/default-avatar.png';
+            const messageHTML = data.map(msg => {
+                const avatar = msg.senderAvatar || 'assets/images/default-avatar.png';
+                return `
+                    <div class="message">
+                        <img src="${avatar}" alt="Avatar" 
+                             style="width:40px; height:40px; border-radius:50%; margin-bottom: 0.5rem;" />
+                        <h3>From: ${msg.nickname || 'Anonymous Confessor'}</h3>
+                        <p>${msg.content}</p>
+                        <small>${msg.date}</small>
+                        <br/>
+                        <a href="compose.html?to=${msg.from}" class="glow-button small" style="margin-top: 0.5rem;">Reply</a>
+                    </div>
+                `;
+            }).join('');
 
-                    return `
-                        <div class="message">
-                            <img src="${avatar}" alt="Avatar" style="width:40px; height:40px; border-radius:50%; margin-bottom: 0.5rem;" />
-                            <h3>From: ${msg.nickname || 'Anonymous Confessor'}</h3>
-                            <p>${msg.content}</p>
-                            <small>${msg.date}</small>
-                            <br/>
-                            <a href="compose.html?to=${msg.from}" class="glow-button small" style="margin-top: 0.5rem;">Reply</a>
-                        </div>
-                    `;
-                }));
-                messagesContainer.innerHTML = messageHTML.join('');
-            });
-    }
+            messagesContainer.innerHTML = messageHTML;
+        })
+        .catch(err => {
+            console.error("Error loading messages:", err);
+            messagesContainer.innerHTML = `<p>Failed to load messages.</p>`;
+        });
+}
+
 
     const themeToggle = document.querySelector('.switch .circle');
     if (themeToggle) {
