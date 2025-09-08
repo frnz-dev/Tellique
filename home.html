@@ -94,6 +94,15 @@
     input:checked ~ .sun.svg {
       opacity: 1;
     }
+
+    /* messages */
+    .message {
+      background: var(--card-bg, #fff);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body class="dashboard">
@@ -129,13 +138,28 @@
     <button id="logout-btn" class="glow-button">Logout</button>
   </nav>
 
-  
+  <div class="inbox">
+    <h2>Your Inbox</h2>
+    <div class="messages" id="messages-container">
 
-    <div class="inbox">
-      <h2> Your Inbox </h2>
-      <div class="messages" id="messages-container"></div>
+      <!-- Example Message with Reactions -->
+      <div class="message" data-id="123456">
+        <p>This is a sample confession/message.</p>
+        <div
+          class="hover:scale-x-105 transition-all duration-300 *:transition-all *:duration-300 
+                 flex justify-start text-2xl items-center shadow-xl z-10 
+                 bg-[#e8e4df] dark:bg-[#191818] gap-2 p-2 rounded-full"
+        >
+          <button class="reaction-btn" data-reaction="like">👍</button>
+          <button class="reaction-btn" data-reaction="heart">💌</button>
+          <button class="reaction-btn" data-reaction="haha">😆</button>
+          <button class="reaction-btn" data-reaction="shux">😲</button>
+          <button class="reaction-btn" data-reaction="sad">☹️</button>
+        </div>
+      </div>
+
     </div>
-  </main>
+  </div>
 
   <script src="assets/js/script.js"></script>
 </body>
